@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 derive_builder = "0.9.0"
-command_macro
+command_macro = { path = "../command_macro" }
+command_macro_derive = { path = "../command_macro/command_macro_derive" }

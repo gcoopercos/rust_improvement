@@ -5,14 +5,13 @@ use std::any::Any;
 #[macro_use]
 extern crate derive_builder;
 
+#[macro_use]
+extern crate command_macro_derive;
+use command_macro::CommandMacro; 
+
 /// Application related commands.
-pub trait AppCommand : Any {
+pub trait AppCommand : Any + CommandMacro {
     fn execute(&self);
-    fn box_eq(&self, other: &dyn Any) -> bool;
-    // fn box_cmp(&self, other: &dyn Any) -> Ordering;
-    // fn box_partial_cmp(&self, other: &dyn Any) -> Option<Ordering>;
-    fn as_any(&self) -> &dyn Any;
-    fn command_time(&self) -> u128;
 }
 
 impl Eq for Box<dyn AppCommand> {
@@ -33,13 +32,11 @@ impl Ord for Box<dyn AppCommand> {
 impl PartialEq for Box<dyn AppCommand> {
     fn eq(&self, other: &Box<dyn AppCommand>) -> bool {
         self.box_eq(other.as_any())
-        // *self == other as Self  
-        // self.command_time() == other.command_time()
-        // other.as_any().downcast_ref::<Self>().map_or(false, |a| self == a)
     }
 }
 
-#[derive(Eq, Ord, PartialOrd, PartialEq, Default, Builder, Debug)]
+#[derive(Eq, Ord, PartialOrd, PartialEq, Default,
+         Builder, Debug, CommandMacro)]
 pub struct HelloCommand {
     command_time: u128
 }
@@ -47,52 +44,16 @@ pub struct HelloCommand {
 impl AppCommand for HelloCommand {
     fn execute(&self) {
     }
-    fn box_eq(&self, other: &dyn Any) -> bool{
-        other.downcast_ref::<Self>().map_or(false, |a| self == a)
-    }
-
-    // fn box_cmp(&self, other: &dyn Any) -> Ordering {
-    //     other.downcast_ref::<Self>().unwrap().cmp(&self)
-    // }
-
-    // fn box_partial_cmp(&self, other: &dyn Any) -> Option<Ordering> {
-    //     other.downcast_ref::<Self>().unwrap().partial_cmp(&self)
-    // }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn command_time(&self) -> u128 {
-        self.command_time
-    }
 }
 
-#[derive(Eq, Ord, PartialOrd, PartialEq, Default, Builder, Debug)]
+#[derive(Eq, Ord, PartialOrd, PartialEq, Default,
+         Builder, Debug, CommandMacro)]
 pub struct WorldCommand {
     command_time: u128
 }
 
 impl AppCommand for WorldCommand {
     fn execute(&self) {
-    }
-
-    fn box_eq(&self, other: &dyn Any) -> bool{
-        other.downcast_ref::<Self>().map_or(false, |a| self == a)
-    }
-
-    // fn box_cmp(&self, other: &dyn Any) -> Ordering {
-    //     other.downcast_ref::<Self>().unwrap().cmp(&self)
-    // }
-
-    // fn box_partial_cmp(&self, other: &dyn Any) -> Option<Ordering> {
-    //     other.downcast_ref::<Self>().unwrap().partial_cmp(&self)
-    // }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn command_time(&self) -> u128 {
-        self.command_time
     }
 }
 
@@ -105,15 +66,6 @@ fn main() {
 mod tests {
     use super::*;
 
-    // #[test]
-    // pub fn downcast_play() {
-    //     let cmd1 = Box::new(WorldCommandBuilder::default()
-    //                         .command_time(70)
-    //                         .build()
-    //                         .unwrap());
-    //     let convertedCmd = cmd1.as_any().downcast_ref::<AppCommand>().unwrap();
-
-    // }
     #[test]
     pub fn equal_test() {
         // Create a command for time 70
